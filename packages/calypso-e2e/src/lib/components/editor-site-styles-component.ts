@@ -12,7 +12,7 @@ const parentSelector = '.edit-site-global-styles-sidebar';
 const selectors = {
 	menuButton: ( buttonName: string ) =>
 		`${ parentSelector } button.components-navigator-button:has-text("${ buttonName }")`,
-	closeSidebarButton: 'button[aria-label="Close global styles sidebar"]:visible',
+	closeSidebarButton: 'button[aria-label="Close Styles sidebar"]:visible',
 	backButton: `${ parentSelector } button[aria-label="Navigate to the previous view"]`,
 	moreActionsMenuButton: `${ parentSelector } button[aria-label="More Global Styles Actions"]`,
 	defaultStyleVariation: `${ parentSelector } .edit-site-global-styles-variations_item[aria-label="Default"]`,
