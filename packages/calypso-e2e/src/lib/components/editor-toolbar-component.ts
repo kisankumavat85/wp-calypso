@@ -3,7 +3,7 @@ import envVariables from '../../env-variables';
 import { translateFromPage } from '../utils';
 import type { EditorPreviewOptions } from './types';
 
-const panel = 'div.edit-site-layout__editor-header';
+const panel = 'div.edit-site-layout__header';
 const settingsButtonLabel = 'Settings';
 const moreOptionsLabel = 'Options';
 const selectors = {
