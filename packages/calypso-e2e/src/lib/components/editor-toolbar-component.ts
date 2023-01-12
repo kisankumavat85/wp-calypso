@@ -3,31 +3,62 @@ import envVariables from '../../env-variables';
 import { translateFromPage } from '../utils';
 import type { EditorPreviewOptions } from './types';
 
-const postEditorPanel = 'div.interface-interface-skeleton__header';
-const siteEditorPanel = 'div.edit-site-layout__header';
+const postEditorHeader = 'div.interface-interface-skeleton__header';
+const siteEditorHeader = 'div.edit-site-layout__header';
 const settingsButtonLabel = 'Settings';
 const moreOptionsLabel = 'Options';
+const selectors = {
+	// Block Inserter
+	// Note the partial class match. This is to support site and post editor. We can't use aria-label because of i18n. :(
+	blockInserterButton: ( header: string ) => `${ header } button[class*="inserter-toggle"]`,
 
-type Selectors = {
-	panel: string;
-	blockInserterButton: string;
-	saveDraftButton: string;
-	switchToDraftButton: string;
-	previewButton: string;
-	desktopPreviewMenuItem: ( target: EditorPreviewOptions ) => string;
-	previewPane: ( target: EditorPreviewOptions ) => string;
-	publishButton: ( state: 'disabled' | 'enabled' ) => string;
-	listViewButton: string;
-	detailsButton: string;
-	documentActionsDropdown: string;
-	documentActionsDropdownItem: ( itemSelector: string ) => string;
-	documentActionsDropdownShowAll: string;
-	settingsButton: ( label: string ) => string;
-	undoButton: string;
-	redoButton: string;
-	moreOptionsButton: ( label: string ) => string;
-	saveSiteEditorButton: string;
-	navSidebarButton: string;
+	// Draft
+	saveDraftButton: ( header: string ) =>
+		`${ header } button[aria-label="Save draft"], button[aria-label="Saved"]`,
+	switchToDraftButton: ( header: string ) => `${ header } button.editor-post-switch-to-draft`,
+
+	// Preview
+	previewButton: ( header: string ) => `${ header } :text("View"):visible`,
+	desktopPreviewMenuItem: ( target: EditorPreviewOptions ) =>
+		`button[role="menuitem"] span:text("${ target }")`,
+	previewPane: ( target: EditorPreviewOptions ) => `.is-${ target.toLowerCase() }-preview`,
+
+	// Publish
+	publishButton: ( header: string, state: 'disabled' | 'enabled' ) => {
+		const buttonState = state === 'disabled' ? 'true' : 'false';
+		return `${ header } button.editor-post-publish-button__button[aria-disabled="${ buttonState }"]`;
+	},
+
+	// List view
+	listViewButton: ( header: string ) => `${ header } button[aria-label="List View"]`,
+
+	// Details popover
+	detailsButton: ( header: string ) => `${ header } button[aria-label="Details"]`,
+
+	// Document Actions dropdown
+	documentActionsDropdown: ( header: string ) =>
+		`${ header } button[aria-label="Show template details"]`,
+	documentActionsDropdownItem: ( itemSelector: string ) => `.popover-slot ${ itemSelector }`,
+	documentActionsDropdownShowAll: `.popover-slot .edit-site-template-details__show-all-button`,
+
+	// Editor settings
+	settingsButton: ( header: string, label = settingsButtonLabel ) =>
+		`${ header } .edit-post-header__settings .interface-pinned-items button[aria-label="${ label }"]`,
+
+	// Undo/Redo
+	undoButton: 'button[aria-disabled=false][aria-label="Undo"]',
+	redoButton: 'button[aria-disabled=false][aria-label="Redo"]',
+
+	// More options
+	moreOptionsButton: ( header: string, label = moreOptionsLabel ) =>
+		`${ header } button[aria-label="${ label }"]`,
+
+	// Site editor save
+	saveSiteEditorButton: ( header: string ) => `${ header } button.edit-site-save-button__button`,
+
+	// Nav sidebar
+	navSidebarButton:
+		'button[aria-label="Block editor sidebar"],button[aria-label="Toggle navigation"]',
 };
 
 /**
@@ -36,7 +67,7 @@ type Selectors = {
 export class EditorToolbarComponent {
 	private page: Page;
 	private editor: Locator;
-	private selectors: Selectors;
+	private header: string;
 
 	/**
 	 * Constructs an instance of the component.
@@ -52,60 +83,7 @@ export class EditorToolbarComponent {
 	) {
 		this.page = page;
 		this.editor = editor;
-
-		const panel = context === 'post-editor' ? postEditorPanel : siteEditorPanel;
-		this.selectors = {
-			panel: panel,
-			// Block Inserter
-			// Note the partial class match. This is to support site and post editor. We can't use aria-label because of i18n. :(
-			blockInserterButton: `${ panel } button[class*="inserter-toggle"]`,
-
-			// Draft
-			saveDraftButton: `${ panel } button[aria-label="Save draft"], button[aria-label="Saved"]`,
-			switchToDraftButton: `${ panel } button.editor-post-switch-to-draft`,
-
-			// Preview
-			previewButton: `${ panel } :text("View"):visible`,
-			desktopPreviewMenuItem: ( target: EditorPreviewOptions ) =>
-				`button[role="menuitem"] span:text("${ target }")`,
-			previewPane: ( target: EditorPreviewOptions ) => `.is-${ target.toLowerCase() }-preview`,
-
-			// Publish
-			publishButton: ( state: 'disabled' | 'enabled' ) => {
-				const buttonState = state === 'disabled' ? 'true' : 'false';
-				return `${ panel } button.editor-post-publish-button__button[aria-disabled="${ buttonState }"]`;
-			},
-
-			// List view
-			listViewButton: `${ panel } button[aria-label="List View"]`,
-
-			// Details popover
-			detailsButton: `${ panel } button[aria-label="Details"]`,
-
-			// Document Actions dropdown
-			documentActionsDropdown: `${ panel } button[aria-label="Show template details"]`,
-			documentActionsDropdownItem: ( itemSelector: string ) => `.popover-slot ${ itemSelector }`,
-			documentActionsDropdownShowAll: `.popover-slot .edit-site-template-details__show-all-button`,
-
-			// Editor settings
-			settingsButton: ( label = settingsButtonLabel ) =>
-				`${ panel } .edit-post-header__settings .interface-pinned-items button[aria-label="${ label }"]`,
-
-			// Undo/Redo
-			undoButton: 'button[aria-disabled=false][aria-label="Undo"]',
-			redoButton: 'button[aria-disabled=false][aria-label="Redo"]',
-
-			// More options
-			moreOptionsButton: ( label = moreOptionsLabel ) =>
-				`${ panel } button[aria-label="${ label }"]`,
-
-			// Site editor save
-			saveSiteEditorButton: `${ panel } button.edit-site-save-button__button`,
-
-			// Nav sidebar
-			navSidebarButton:
-				'button[aria-label="Block editor sidebar"],button[aria-label="Toggle navigation"]',
-		};
+		this.header = context === 'post-editor' ? postEditorHeader : siteEditorHeader;
 	}
 
 	/**
@@ -140,8 +118,8 @@ export class EditorToolbarComponent {
 	 * Opens the block inserter.
 	 */
 	async openBlockInserter(): Promise< void > {
-		if ( ! ( await this.targetIsOpen( this.selectors.blockInserterButton ) ) ) {
-			const locator = this.editor.locator( this.selectors.blockInserterButton );
+		if ( ! ( await this.targetIsOpen( selectors.blockInserterButton( this.header ) ) ) ) {
+			const locator = this.editor.locator( selectors.blockInserterButton( this.header ) );
 			await locator.click();
 		}
 	}
@@ -150,11 +128,11 @@ export class EditorToolbarComponent {
 	 * Closes the block inserter.
 	 */
 	async closeBlockInserter(): Promise< void > {
-		if ( await this.targetIsOpen( this.selectors.blockInserterButton ) ) {
+		if ( await this.targetIsOpen( selectors.blockInserterButton( this.header ) ) ) {
 			// We click on the panel instead of on the block inserter button as a workaround for an issue
 			// that disables the block inserter button after inserting a block using the block API V2.
 			// See https://github.com/WordPress/gutenberg/issues/43090.
-			const locator = this.editor.locator( this.selectors.panel );
+			const locator = this.editor.locator( this.header );
 			await locator.click();
 		}
 	}
@@ -167,7 +145,7 @@ export class EditorToolbarComponent {
 	 * If the button cannot be clicked, the method short-circuits.
 	 */
 	async saveDraft(): Promise< void > {
-		const saveButtonLocator = this.editor.locator( this.selectors.saveDraftButton );
+		const saveButtonLocator = this.editor.locator( selectors.saveDraftButton( this.header ) );
 
 		try {
 			await saveButtonLocator.waitFor( { timeout: 5 * 1000 } );
@@ -176,7 +154,7 @@ export class EditorToolbarComponent {
 		}
 
 		const savedButtonLocator = this.editor.locator(
-			`${ this.selectors.saveDraftButton }.is-saved`
+			`${ selectors.saveDraftButton( this.header ) }.is-saved`
 		);
 
 		await saveButtonLocator.click();
@@ -192,7 +170,9 @@ export class EditorToolbarComponent {
 	 * @returns {Page} Handler for the new page object.
 	 */
 	async openMobilePreview(): Promise< Page > {
-		const mobilePreviewButtonLocator = this.editor.locator( this.selectors.previewButton );
+		const mobilePreviewButtonLocator = this.editor.locator(
+			selectors.previewButton( this.header )
+		);
 
 		const [ popup ] = await Promise.all( [
 			this.page.waitForEvent( 'popup' ),
@@ -211,12 +191,12 @@ export class EditorToolbarComponent {
 
 		// Locate and click on the intended preview target.
 		const desktopPreviewMenuItemLocator = this.editor.locator(
-			this.selectors.desktopPreviewMenuItem( target )
+			selectors.desktopPreviewMenuItem( target )
 		);
 		await desktopPreviewMenuItemLocator.click();
 
 		// Verify the editor panel is resized and stable.
-		const desktopPreviewPaneLocator = this.editor.locator( this.selectors.previewPane( target ) );
+		const desktopPreviewPaneLocator = this.editor.locator( selectors.previewPane( target ) );
 		await desktopPreviewPaneLocator.waitFor();
 		const elementHandle = await desktopPreviewPaneLocator.elementHandle();
 		await elementHandle?.waitForElementState( 'stable' );
@@ -229,8 +209,10 @@ export class EditorToolbarComponent {
 	 * Opens the Preview menu for Desktop viewport.
 	 */
 	async openDesktopPreviewMenu(): Promise< void > {
-		if ( ! ( await this.targetIsOpen( this.selectors.previewButton ) ) ) {
-			const desktopPreviewButtonLocator = this.editor.locator( this.selectors.previewButton );
+		if ( ! ( await this.targetIsOpen( selectors.previewButton( this.header ) ) ) ) {
+			const desktopPreviewButtonLocator = this.editor.locator(
+				selectors.previewButton( this.header )
+			);
 			await desktopPreviewButtonLocator.click();
 		}
 	}
@@ -239,8 +221,10 @@ export class EditorToolbarComponent {
 	 * Closes the Preview menu for the Desktop viewport.
 	 */
 	async closeDesktopPreviewMenu(): Promise< void > {
-		if ( await this.targetIsOpen( this.selectors.previewButton ) ) {
-			const desktopPreviewButtonLocator = this.editor.locator( this.selectors.previewButton );
+		if ( await this.targetIsOpen( selectors.previewButton( this.header ) ) ) {
+			const desktopPreviewButtonLocator = this.editor.locator(
+				selectors.previewButton( this.header )
+			);
 			await desktopPreviewButtonLocator.click();
 		}
 	}
@@ -256,7 +240,9 @@ export class EditorToolbarComponent {
 	 * 	- schedule a post (Schedule)
 	 */
 	async clickPublish(): Promise< void > {
-		const publishButtonLocator = this.editor.locator( this.selectors.publishButton( 'enabled' ) );
+		const publishButtonLocator = this.editor.locator(
+			selectors.publishButton( this.header, 'enabled' )
+		);
 		await publishButtonLocator.click();
 	}
 
@@ -265,7 +251,9 @@ export class EditorToolbarComponent {
 	 * the article.
 	 */
 	async switchToDraft(): Promise< void > {
-		const swithcToDraftLocator = this.editor.locator( this.selectors.switchToDraftButton );
+		const swithcToDraftLocator = this.editor.locator(
+			selectors.switchToDraftButton( this.header )
+		);
 		await swithcToDraftLocator.click();
 	}
 
@@ -276,7 +264,7 @@ export class EditorToolbarComponent {
 	 */
 	async openSettings(): Promise< void > {
 		const label = await this.translateFromPage( settingsButtonLabel );
-		const selector = this.selectors.settingsButton( label );
+		const selector = selectors.settingsButton( this.header, label );
 
 		if ( await this.targetIsOpen( selector ) ) {
 			return;
@@ -290,7 +278,7 @@ export class EditorToolbarComponent {
 	 */
 	async closeSettings(): Promise< void > {
 		const label = await this.translateFromPage( settingsButtonLabel );
-		const selector = this.selectors.settingsButton( label );
+		const selector = selectors.settingsButton( this.header, label );
 
 		if ( ! ( await this.targetIsOpen( selector ) ) ) {
 			return;
@@ -305,11 +293,11 @@ export class EditorToolbarComponent {
 	 * Opens the nav sidebar.
 	 */
 	async openNavSidebar(): Promise< void > {
-		if ( await this.targetIsOpen( this.selectors.navSidebarButton ) ) {
+		if ( await this.targetIsOpen( selectors.navSidebarButton ) ) {
 			return;
 		}
 
-		const locator = this.editor.locator( this.selectors.navSidebarButton );
+		const locator = this.editor.locator( selectors.navSidebarButton );
 		await locator.click();
 	}
 
@@ -317,11 +305,11 @@ export class EditorToolbarComponent {
 	 * Closes the nav sidebar.
 	 */
 	async closeNavSidebar(): Promise< void > {
-		if ( ! ( await this.targetIsOpen( this.selectors.navSidebarButton ) ) ) {
+		if ( ! ( await this.targetIsOpen( selectors.navSidebarButton ) ) ) {
 			return;
 		}
 
-		const locator = this.editor.locator( this.selectors.navSidebarButton );
+		const locator = this.editor.locator( selectors.navSidebarButton );
 		await locator.click();
 	}
 
@@ -336,11 +324,11 @@ export class EditorToolbarComponent {
 			return;
 		}
 
-		if ( await this.targetIsOpen( this.selectors.listViewButton ) ) {
+		if ( await this.targetIsOpen( selectors.listViewButton( this.header ) ) ) {
 			return;
 		}
 
-		const locator = this.editor.locator( this.selectors.listViewButton );
+		const locator = this.editor.locator( selectors.listViewButton( this.header ) );
 		await locator.click();
 	}
 
@@ -353,11 +341,11 @@ export class EditorToolbarComponent {
 			return;
 		}
 
-		if ( ! ( await this.targetIsOpen( this.selectors.listViewButton ) ) ) {
+		if ( ! ( await this.targetIsOpen( selectors.listViewButton( this.header ) ) ) ) {
 			return;
 		}
 
-		const locator = this.editor.locator( this.selectors.listViewButton );
+		const locator = this.editor.locator( selectors.listViewButton( this.header ) );
 		await locator.click();
 	}
 
@@ -372,11 +360,11 @@ export class EditorToolbarComponent {
 			return;
 		}
 
-		if ( await this.targetIsOpen( this.selectors.detailsButton ) ) {
+		if ( await this.targetIsOpen( selectors.detailsButton( this.header ) ) ) {
 			return;
 		}
 
-		const locator = this.editor.locator( this.selectors.detailsButton );
+		const locator = this.editor.locator( selectors.detailsButton( this.header ) );
 		await locator.click();
 	}
 
@@ -386,7 +374,7 @@ export class EditorToolbarComponent {
 	 * @throws If the undo button is not enabled.
 	 */
 	async undo(): Promise< void > {
-		const locator = this.editor.locator( this.selectors.undoButton );
+		const locator = this.editor.locator( selectors.undoButton );
 		await locator.click();
 	}
 
@@ -396,7 +384,7 @@ export class EditorToolbarComponent {
 	 * @throws If the redo button is not enabled.
 	 */
 	async redo(): Promise< void > {
-		const locator = this.editor.locator( this.selectors.redoButton );
+		const locator = this.editor.locator( selectors.redoButton );
 		await locator.click();
 	}
 
@@ -405,7 +393,7 @@ export class EditorToolbarComponent {
 	 */
 	async openMoreOptionsMenu(): Promise< void > {
 		const label = await this.translateFromPage( moreOptionsLabel );
-		const selector = this.selectors.moreOptionsButton( label );
+		const selector = selectors.moreOptionsButton( this.header, label );
 
 		if ( ! ( await this.targetIsOpen( selector ) ) ) {
 			const locator = this.editor.locator( selector );
@@ -419,7 +407,7 @@ export class EditorToolbarComponent {
 	 * Click the save button (publish equivalent) for the full site editor.
 	 */
 	async saveSiteEditor(): Promise< void > {
-		const locator = this.editor.locator( this.selectors.saveSiteEditorButton );
+		const locator = this.editor.locator( selectors.saveSiteEditorButton( this.header ) );
 		await locator.click();
 	}
 
@@ -427,7 +415,7 @@ export class EditorToolbarComponent {
 	 * Click the document actions icon for the full site editor.
 	 */
 	async clickDocumentActionsIcon(): Promise< void > {
-		const locator = this.editor.locator( this.selectors.documentActionsDropdown );
+		const locator = this.editor.locator( selectors.documentActionsDropdown( this.header ) );
 		await locator.click();
 	}
 
@@ -435,7 +423,7 @@ export class EditorToolbarComponent {
 	 * Click the document actions icon for the full site editor.
 	 */
 	async clickDocumentActionsDropdownItem( itemName: string ): Promise< void > {
-		const locator = this.editor.locator( this.selectors.documentActionsDropdownItem( itemName ) );
+		const locator = this.editor.locator( selectors.documentActionsDropdownItem( itemName ) );
 		await locator.click();
 	}
 }
