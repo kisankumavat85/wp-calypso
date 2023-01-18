@@ -33,11 +33,12 @@ const PatternAssembler: Step = ( { navigation, flow } ) => {
 	const [ sectionPosition, setSectionPosition ] = useState< number | null >( null );
 	const incrementIndexRef = useRef( 0 );
 	const [ activePosition, setActivePosition ] = useState( -1 );
-	const { goBack, goNext, submit, goToStep } = navigation;
+	const { goBack, goNext, submit } = navigation;
 	const { setThemeOnSite, runThemeSetupOnSite, createCustomTemplate } = useDispatch( SITE_STORE );
 	const reduxDispatch = useReduxDispatch();
 	const { setPendingAction } = useDispatch( ONBOARD_STORE );
 	const selectedDesign = useSelect( ( select ) => select( ONBOARD_STORE ).getSelectedDesign() );
+	const { setSelectedDesign } = useDispatch( ONBOARD_STORE );
 	const intent = useSelect( ( select ) => select( ONBOARD_STORE ).getIntent() );
 	const site = useSite();
 	const siteSlug = useSiteSlugParam();
@@ -61,9 +62,18 @@ const PatternAssembler: Step = ( { navigation, flow } ) => {
 	};
 
 	useEffect( () => {
-		// Require to start the flow from the first step
 		if ( ! selectedDesign ) {
-			goToStep?.( 'goals' );
+			setSelectedDesign( {
+				slug: 'blank-canvas-3',
+				title: 'Blank Canvas',
+				recipe: {
+					stylesheet: 'pub/blank-canvas-3',
+				},
+				verticalizable: false,
+				is_premium: false,
+				is_bundled_with_woo_commerce: false,
+				design_type: 'assembler',
+			} as Design );
 		}
 	}, [] );
 
