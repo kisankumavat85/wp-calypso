@@ -330,47 +330,9 @@ object RunAllUnitTests : BuildType({
 			"""
 		}
 		bashNodeScript {
-			name = "Prevent uncommited changes"
+			name = "Run test suite"
 			executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
 			scriptContent = """
-				export NODE_ENV="test"
-
-				# Prevent uncommited changes
-				DIRTY_FILES=${'$'}(git status --porcelain 2>/dev/null)
-				if [ ! -z "${'$'}DIRTY_FILES" ]; then
-					echo "Repository contains uncommitted changes: "
-					echo "${'$'}DIRTY_FILES"
-					echo "You need to checkout the branch, run 'yarn' and commit those files."
-					exit 1
-				fi
-			"""
-		}
-		bashNodeScript {
-			name = "Prevent duplicated packages"
-			executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
-			scriptContent = """
-				# Duplicated packages
-				if ! DUPLICATED_PACKAGES=${'$'}(
-					set +e
-					yarn dedupe --check
-				); then
-					echo "Repository contains duplicated packages: "
-					echo ""
-					echo "${'$'}DUPLICATED_PACKAGES"
-					echo ""
-					echo "To fix them, you need to checkout the branch, run 'yarn dedupe',"
-					echo "verify that the new packages work and commit the changes in 'yarn.lock'."
-					exit 1
-				else
-					echo "No duplicated packages found."
-				fi
-			"""
-		}
-		bashNodeScript {
-			name = "Run type checks"
-			executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
-			scriptContent = """
-			# Run type checks
 				./.teamcity/step-scripts/calypso-unit-tests.sh
 			""".trimIndent()
 		}
