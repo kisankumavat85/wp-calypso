@@ -370,67 +370,9 @@ object RunAllUnitTests : BuildType({
 			name = "Run type checks"
 			executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
 			scriptContent = """
-				set -x
-				export NODE_ENV="test"
-
-				# These are not expected to fail
-				yarn tsc --build packages/*/tsconfig.json
-				yarn tsc --build apps/editing-toolkit/tsconfig.json
-				yarn tsc --build client/tsconfig.json
-				yarn tsc --build test/e2e/tsconfig.json
-			"""
-		}
-		bashNodeScript {
-			name = "Run unit tests for client"
-			executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
-			scriptContent = """
-				unset NODE_ENV
-				unset CALYPSO_ENV
-
-				# Run client tests
-				yarn test-client --maxWorkers=${'$'}JEST_MAX_WORKERS --ci --reporters=default --reporters=jest-teamcity --silent
-			"""
-		}
-		bashNodeScript {
-			name = "Run unit tests for server"
-			executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
-			scriptContent = """
-				unset NODE_ENV
-				unset CALYPSO_ENV
-
-				# Run server tests
-				yarn test-server --maxWorkers=${'$'}JEST_MAX_WORKERS --ci --reporters=default --reporters=jest-teamcity --silent
-			"""
-		}
-		bashNodeScript {
-			name = "Run unit tests for packages"
-			executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
-			scriptContent = """
-				unset NODE_ENV
-				unset CALYPSO_ENV
-
-				# Run packages tests
-				yarn test-packages --maxWorkers=${'$'}JEST_MAX_WORKERS --ci --reporters=default --reporters=jest-teamcity --silent
-			"""
-		}
-		bashNodeScript {
-			name = "Run unit tests for build tools"
-			executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
-			scriptContent = """
-				unset NODE_ENV
-				unset CALYPSO_ENV
-
-				# Run build-tools tests
-				yarn test-build-tools --maxWorkers=${'$'}JEST_MAX_WORKERS --ci --reporters=default --reporters=jest-teamcity --silent
-			"""
-		}
-		bashNodeScript {
-			name = "Run storybook tests"
-			executionMode = BuildStep.ExecutionMode.RUN_ON_FAILURE
-			scriptContent = """
-				set -x
-				yarn workspaces foreach --verbose --parallel run storybook --ci --smoke-test
-			"""
+			# Run type checks
+				./.teamcity/step-scripts/calypso-unit-tests.sh
+			""".trimIndent()
 		}
 		bashNodeScript {
 			name = "Tag build"
