@@ -58,15 +58,15 @@ for config in "${ts_configs[@]}"; do
 done
 
 # Waits for all tsc background jobs to finish
-wait
-echo "DONE WITH ALL TSC"
+# wait
+# echo "DONE WITH ALL TSC"
 
 #### Run unit tests
 unset NODE_ENV
 unset CALYPSO_ENV
 
 # Run this suite by itself, since it's very large.
-yarn test-client --maxWorkers=$JEST_MAX_WORKERS --ci --reporters=default --reporters=jest-teamcity --silent
+yarn test-client --maxWorkers=$JEST_MAX_WORKERS --ci --reporters=default --reporters=jest-teamcity --silent &
 
 # Run these in parallel, since they're smaller.
 yarn test-server --maxWorkers=$JEST_MAX_WORKERS --ci --reporters=default --reporters=jest-teamcity --silent &
