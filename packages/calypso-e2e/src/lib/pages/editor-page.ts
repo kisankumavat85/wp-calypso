@@ -154,7 +154,12 @@ export class EditorPage {
 		// In a typical loading scenario, this request is one of the last to fire.
 		// Lacking a perfect cross-site type (Simple/Atomic) way to check the loading state,
 		// it is a fairly good stand-in.
-		await this.page.waitForResponse( /.*posts.*/, { timeout: EXTENDED_TIMEOUT } );
+		const regex = new RegExp( `(.*/(page|post)/.*)|(.*wp-admin/post-new.*)` );
+
+		await Promise.all( [
+			this.page.waitForResponse( /.*posts.*/, { timeout: EXTENDED_TIMEOUT } ),
+			this.page.waitForURL( regex, { timeout: EXTENDED_TIMEOUT } ),
+		] );
 
 		// Dismiss the Welcome Tour.
 		await this.editorWelcomeTourComponent.forceDismissWelcomeTour();

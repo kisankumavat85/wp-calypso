@@ -25,7 +25,7 @@ export class EditorWelcomeTourComponent {
 	 */
 	async forceDismissWelcomeTour(): Promise< void > {
 		// Locator API doesn't have waitForFunction yet. We need a Frame for now.
-		const editorElement = await this.editor.elementHandle();
+		const editorElement = await this.editor.elementHandle( { timeout: 30 * 1000 } );
 		const editorFrame = await editorElement?.ownerFrame();
 		if ( ! editorFrame ) {
 			return;
