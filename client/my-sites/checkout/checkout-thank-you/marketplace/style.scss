@@ -52,6 +52,7 @@
 	.thank-you__footer {
 		max-width: 1072px;
 		padding: 40px;
+		padding-top: 5px;
 		display: flex;
 		flex-wrap: wrap;
 		gap: 75px;
@@ -62,6 +63,7 @@
 			flex-direction: column;
 			justify-content: space-between;
 			flex-wrap: wrap;
+			height: 134px;
 			min-width: 280px;
 
 			@media ( max-width: 740px ) {
@@ -74,10 +76,11 @@
 			}
 
 			h3 {
-				line-height: 24px;
+				line-height: 16px;
 				font-weight: 500;
 				font-size: $font-body;
 				color: var(--studio-gray-100);
+				margin-bottom: 5px;
 			}
 
 			p {
@@ -92,12 +95,12 @@
 		}
 
 		.thank-you__step-icon {
-			width: 50px;
+			width: calc(18px + 23px); // icon size + padding
 			flex-basis: 100%;
 		}
 
 		div {
-			max-width: 240px;
+			max-width: 260px;
 
 			@media ( max-width: 740px ) {
 				min-width: auto;
