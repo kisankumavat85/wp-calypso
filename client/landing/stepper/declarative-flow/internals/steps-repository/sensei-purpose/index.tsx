@@ -8,46 +8,18 @@ import FormattedHeader from 'calypso/components/formatted-header';
 import { SenseiStepProgress } from 'calypso/landing/stepper/declarative-flow/internals/steps-repository/sensei-setup/sensei-step-progress';
 import { recordTracksEvent } from 'calypso/lib/analytics/tracks';
 import PurposeItem from './purpose-item';
+import { clearSelectedPurposes, FormState, purposes, saveSelectedPurposes } from './purposes';
 import type { Step } from '../../types';
 import './style.scss';
 
 const wait = ( ms: number ) => new Promise( ( res ) => setTimeout( res, ms ) );
 
-export const purposes = [
-	{
-		id: 'sell_courses',
-		label: __( 'Sell courses and generate income' ),
-		plugin: { slug: 'woocommerce', id: 'woocommerce/woocommerce' },
-		//description: __( 'WooCommerce will be installed for free.' ),
-	},
-	{
-		id: 'provide_certification',
-		label: __( 'Provide certification' ),
-		plugin: {
-			slug: 'sensei-certificates',
-			id: 'sensei-certificates/woothemes-sensei-certificates',
-		},
-		//description: __( 'Sensei LMS Certificates will be installed for free.' ),
-	},
-	{
-		id: 'educate_students',
-		label: __( 'Educate students' ),
-		description: null,
-	},
-	{
-		id: 'train_employees',
-		label: __( 'Train employees' ),
-		description: null,
-	},
-];
-
-type FormState = {
-	selected: string[];
-	other: string;
-};
-
 const SenseiPurpose: Step = ( { navigation: { submit } } ) => {
 	const [ progress, setProgress ] = useState< number >( 0 );
+
+	useEffect( () => {
+		clearSelectedPurposes();
+	}, [] );
 
 	// Stall for a few seconds while the atomic transfer is going on.
 	useEffect( () => {
@@ -62,10 +34,11 @@ const SenseiPurpose: Step = ( { navigation: { submit } } ) => {
 
 	const waiting = progress < 110;
 
-	const [ { selected, other }, setFormState ] = useState< FormState >( {
+	const [ formState, setFormState ] = useState< FormState >( {
 		selected: [],
 		other: '',
 	} );
+	const { selected, other } = formState;
 
 	const isEmpty = ! selected.length;
 
@@ -79,8 +52,7 @@ const SenseiPurpose: Step = ( { navigation: { submit } } ) => {
 	};
 
 	const submitPage = async () => {
-		// TODO Save user selection.
-
+		saveSelectedPurposes( formState );
 		submit?.();
 	};
 
