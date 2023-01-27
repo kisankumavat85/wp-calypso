@@ -151,7 +151,7 @@ object BuildDockerImage : BuildType({
 			}
 			param("dockerImage.platform", "linux")
 		}
-	
+
 		dockerCommand {
 			commandType = push {
 				namesAndTags = """
