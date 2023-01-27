@@ -55,6 +55,14 @@ object BuildDockerImage : BuildType({
 			checked = "true",
 			unchecked = "false"
 		)
+		checkbox(
+			name = "UPDATE_BASE_IMAGE_CACHE",
+			value = "false",
+			label = "Update the base image from the cache.",
+			description = "Updates the base image by copying .cache files from the current build. Runs on trunk by default.",
+			checked = "true",
+			unchecked = "false"
+		)
 	}
 
 	vcs {
@@ -236,6 +244,22 @@ object BuildDockerImage : BuildType({
 				</details>
 				EOF
 			"""
+		}
+
+		// Runs after everything else to avoid blocking the deploy system or calypso.live.
+		// info. Should only run on trunk builds. Runs as a script instead of a
+		// dockerCommand because we should do it conditionally.
+		script {
+			name = "Update cache image"
+			scriptContent = """
+				#!/usr/bin/env bash
+				if [[ "%teamcity.build.branch.is_default%" != "true" && "%UPDATE_BASE_IMAGE_CACHE%" != "true" ]] ; then
+					exit 0
+				fi
+				# Build the image again, this time with the target update-base-image. Most layers should be cached.
+				docker build -f Dockerfile -t registry.a8c.com/calypso/base:latest --target update-base-cache $commonArgs
+				docker push "registry.a8c.com/calypso/base:latest"
+			""".trimIndent()
 		}
 	}
 
