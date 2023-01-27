@@ -242,8 +242,9 @@ object BuildDockerImage : BuildType({
 					exit 0
 				fi
 				# Build the image again, this time with the target update-base-image. Most layers should be cached.
-				docker build -f Dockerfile -t registry.a8c.com/calypso/base:latest --target update-base-cache $commonArgs
-				docker push "registry.a8c.com/calypso/base:latest"
+				if docker build -f Dockerfile -t registry.a8c.com/calypso/base:latest --target update-base-cache $commonArgs . ; then
+					docker push "registry.a8c.com/calypso/base:latest"
+				fi
 			""".trimIndent()
 		}
 	}
