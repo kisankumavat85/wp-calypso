@@ -241,7 +241,9 @@ object BuildDockerImage : BuildType({
 				if [[ "%teamcity.build.branch.is_default%" != "true" && "%UPDATE_BASE_IMAGE_CACHE%" != "true" ]] ; then
 					exit 0
 				fi
-				# Build the image again, this time with the target update-base-image. Most layers should be cached.
+				# Build the image again, this time with the target update-base-image.
+				# Most layers should be cached from above, so it's not like we're
+				# re-running every part of the Dockerfile again.
 				if docker build -f Dockerfile -t registry.a8c.com/calypso/base:latest --target update-base-cache $commonArgs . ; then
 					docker push "registry.a8c.com/calypso/base:latest"
 				fi
